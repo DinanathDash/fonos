@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Play, Music, Radio, Database, Sparkles } from 'lucide-react';
-import musicService from '@/services/musicService';
 
 const MusicCatalogShowcase = () => {
   const [stats, setStats] = useState(null);
@@ -20,15 +19,12 @@ const MusicCatalogShowcase = () => {
       setIsLoading(true);
       
       // Get service information
-      const info = musicService.getServiceInfo();
       setServiceInfo(info);
 
       // Get music statistics
-      const musicStats = await musicService.getMusicStats();
       setStats(musicStats);
 
       // Get some demo tracks
-      const tracks = await musicService.getDiscoveryTracks(6);
       setDemoTracks(tracks);
 
     } catch (error) {
@@ -40,7 +36,6 @@ const MusicCatalogShowcase = () => {
 
   const handleTestAPI = async (source) => {
     try {
-      const tracks = await musicService.getTracksBySource(source, 5);
       console.log(`${source} tracks:`, tracks);
       alert(`Successfully loaded ${tracks.length} tracks from ${source}!`);
     } catch (error) {

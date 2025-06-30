@@ -351,11 +351,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
   <p>Made with ❤️ by the Fonos team</p>
-  <p>
-    <a href="https://fonos-app.com">Website</a> •
-    <a href="https://twitter.com/fonos_app">Twitter</a> •
-    <a href="https://github.com/yourusername/fonos">GitHub</a>
-  </p>
 </div>+ Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

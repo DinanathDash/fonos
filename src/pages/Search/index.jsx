@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/ta
 import BrowseGenres from './BrowseGenres';
 import SearchResultTracks from './SearchResultTracks';
 import SearchResultArtists from './SearchResultArtists';
-import musicService from '../../services/musicService';
 
 const Search = () => {
   const [searchParams] = useSearchParams();
@@ -35,9 +34,6 @@ const Search = () => {
     try {
       setLoading(true);
       
-      // Use the new music service for search
-      const results = await musicService.search(searchQuery, 'all', 20);
-      
       setSearchResults(results);
     } catch (error) {
       console.error('Search failed:', error);
@@ -61,7 +57,6 @@ const Search = () => {
     setQuery(genreName);
     try {
       setLoading(true);
-      const results = await musicService.getTracksByGenre(genreName, 20);
       setSearchResults({
         tracks: results,
         artists: [],

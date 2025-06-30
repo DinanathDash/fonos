@@ -7,7 +7,6 @@ import WelcomeBanner from './WelcomeBanner';
 import RecentlyPlayedSection from './RecentlyPlayedSection';
 import FeaturedPlaylistsSection from './FeaturedPlaylistsSection';
 import TopTracksSection from './TopTracksSection';
-import musicService from '../../services/musicService';
 import { getTimeOfDay } from './utils';
 
 const Home = () => {
@@ -19,30 +18,100 @@ const Home = () => {
   const { playTrack } = usePlayer();
   const { onOpenAuth } = useOutletContext();
 
-  useEffect(() => {
-    loadHomeData();
-  }, []);
-
   const loadHomeData = async () => {
     try {
       setLoading(true);
       
-      // Load data from the new music service
-      const [playlists, recent, tracks] = await Promise.all([
-        musicService.getFeaturedPlaylists(6),
-        musicService.getRecentlyPlayedTracks(10),
-        musicService.getTopTracks(20)
-      ]);
-      
-      setFeaturedPlaylists(playlists);
-      setRecentlyPlayed(recent);
-      setTopTracks(tracks);
+      // Mock data for featured playlists
+      const mockFeaturedPlaylists = [
+        {
+          id: 1,
+          title: "Today's Top Hits",
+          description: "The biggest hits right now",
+          image: "https://picsum.photos/300/300?random=1",
+          trackCount: 50
+        },
+        {
+          id: 2,
+          title: "Chill Vibes",
+          description: "Relax and unwind with these chill tracks",
+          image: "https://picsum.photos/300/300?random=2",
+          trackCount: 30
+        },
+        {
+          id: 3,
+          title: "Workout Mix",
+          description: "High energy tracks for your workout",
+          image: "https://picsum.photos/300/300?random=3",
+          trackCount: 40
+        }
+      ];
+
+      // Mock data for recently played (only if user is authenticated)
+      const mockRecentlyPlayed = user ? [
+        {
+          id: 1,
+          title: "Song One",
+          artist: "Artist One",
+          image: "https://picsum.photos/200/200?random=4",
+          duration: "3:45"
+        },
+        {
+          id: 2,
+          title: "Song Two",
+          artist: "Artist Two",
+          image: "https://picsum.photos/200/200?random=5",
+          duration: "4:12"
+        }
+      ] : [];
+
+      // Mock data for top tracks
+      const mockTopTracks = [
+        {
+          id: 1,
+          title: "Popular Song 1",
+          artist: "Popular Artist 1",
+          album: "Album 1",
+          image: "https://picsum.photos/200/200?random=6",
+          duration: "3:30",
+          preview_url: null
+        },
+        {
+          id: 2,
+          title: "Popular Song 2",
+          artist: "Popular Artist 2",
+          album: "Album 2",
+          image: "https://picsum.photos/200/200?random=7",
+          duration: "4:05",
+          preview_url: null
+        },
+        {
+          id: 3,
+          title: "Popular Song 3",
+          artist: "Popular Artist 3",
+          album: "Album 3",
+          image: "https://picsum.photos/200/200?random=8",
+          duration: "3:55",
+          preview_url: null
+        }
+      ];
+
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      setFeaturedPlaylists(mockFeaturedPlaylists);
+      setRecentlyPlayed(mockRecentlyPlayed);
+      setTopTracks(mockTopTracks);
     } catch (error) {
-      console.error('Failed to load home data:', error);
+      console.error('Error loading home data:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadHomeData();
+  }, []);
 
   const handlePlayTrack = (track) => {
     playTrack(track, topTracks);
@@ -81,10 +150,10 @@ const Home = () => {
       {/* Featured Playlists */}
       <FeaturedPlaylistsSection featuredPlaylists={featuredPlaylists} />
 
-      {/* Your Top Tracks */}
-      <TopTracksSection 
+      {/* Your Top Tracks */}      <TopTracksSection 
         topTracks={topTracks} 
-        onPlayTrack={handlePlayTrack} 
+        onPlayTrack={handlePlayTrack}
+        loading={loading}
       />
     </div>
   );

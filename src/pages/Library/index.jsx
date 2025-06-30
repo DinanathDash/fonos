@@ -8,7 +8,6 @@ import { Card, CardContent } from '../../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Badge } from '../../components/ui/badge';
 import { cn } from '../../lib/utils';
-import musicService from '../../services/musicService';
 
 const Library = () => {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
@@ -24,12 +23,6 @@ const Library = () => {
 
   const loadLibraryItems = async () => {
     try {
-      // Load user's library items from the music service
-      const [playlists, savedTracks] = await Promise.all([
-        musicService.getUserPlaylists(10),
-        musicService.getUserSavedTracks(20)
-      ]);
-
       // Convert to library format
       const playlistItems = playlists.map(playlist => ({
         id: playlist.id,

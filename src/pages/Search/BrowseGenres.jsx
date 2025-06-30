@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '../../components/ui/card';
 import { cn } from '../../lib/utils';
-import musicService from '../../services/musicService';
 
 const BrowseGenres = ({ onGenreClick }) => {
   const [genres, setGenres] = useState([]);
@@ -14,7 +13,6 @@ const BrowseGenres = ({ onGenreClick }) => {
   const loadGenres = async () => {
     try {
       setLoading(true);
-      const genreData = await musicService.getGenres();
       setGenres(genreData);
     } catch (error) {
       console.error('Failed to load genres:', error);
