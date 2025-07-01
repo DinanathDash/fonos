@@ -6,6 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/ta
 import BrowseGenres from './BrowseGenres';
 import SearchResultTracks from './SearchResultTracks';
 import SearchResultArtists from './SearchResultArtists';
+import SearchResultAlbums from './SearchResultAlbums';
+import SearchResultPlaylists from './SearchResultPlaylists';
+import musicService from '../../services/musicService';
 
 const Search = () => {
   const [searchParams] = useSearchParams();
@@ -34,6 +37,7 @@ const Search = () => {
     try {
       setLoading(true);
       
+      const results = await musicService.search(searchQuery, activeTab === 'all' ? 'all' : activeTab);
       setSearchResults(results);
     } catch (error) {
       console.error('Search failed:', error);
@@ -57,12 +61,8 @@ const Search = () => {
     setQuery(genreName);
     try {
       setLoading(true);
-      setSearchResults({
-        tracks: results,
-        artists: [],
-        albums: [],
-        playlists: []
-      });
+      const results = await musicService.search(genreName, 'tracks');
+      setSearchResults(results);
     } catch (error) {
       console.error('Genre search failed:', error);
     } finally {
@@ -122,6 +122,20 @@ const Search = () => {
                   <SearchResultArtists artists={searchResults.artists.slice(0, 6)} />
                 </section>
               )}
+
+              {searchResults.albums.length > 0 && (
+                <section>
+                  <h2 className="text-xl font-bold text-foreground mb-4">Albums</h2>
+                  <SearchResultAlbums albums={searchResults.albums.slice(0, 6)} />
+                </section>
+              )}
+
+              {searchResults.playlists.length > 0 && (
+                <section>
+                  <h2 className="text-xl font-bold text-foreground mb-4">Playlists</h2>
+                  <SearchResultPlaylists playlists={searchResults.playlists.slice(0, 6)} />
+                </section>
+              )}
             </TabsContent>
 
             <TabsContent value="tracks">
@@ -133,17 +147,11 @@ const Search = () => {
             </TabsContent>
 
             <TabsContent value="albums">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                {/* Albums component would go here */}
-                <p className="text-muted-foreground">Albums results coming soon...</p>
-              </div>
+              <SearchResultAlbums albums={searchResults.albums} />
             </TabsContent>
 
             <TabsContent value="playlists">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                {/* Playlists component would go here */}
-                <p className="text-muted-foreground">Playlists results coming soon...</p>
-              </div>
+              <SearchResultPlaylists playlists={searchResults.playlists} />
             </TabsContent>
 
             {!loading && query && Object.values(searchResults).every(arr => arr.length === 0) && (

@@ -6,7 +6,7 @@ const TopTracksSection = ({ topTracks, onPlayTrack, loading }) => {
   if (loading) {
     return (
       <section>
-        <h2 className="text-2xl font-bold text-foreground mb-6">Your Top Tracks</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">Top Bollywood Tracks</h2>
         <div className="space-y-2">
           {[...Array(5)].map((_, index) => (
             <Card key={index} className="animate-pulse">
@@ -28,14 +28,14 @@ const TopTracksSection = ({ topTracks, onPlayTrack, loading }) => {
   if (!topTracks || topTracks.length === 0) {
     return (
       <section>
-        <h2 className="text-2xl font-bold text-foreground mb-6">Your Top Tracks</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">Top Bollywood Tracks</h2>
         <Card>
           <CardContent className="p-6 text-center">
             <p className="text-muted-foreground mb-2">
-              🎵 Loading your top tracks...
+              🎵 Loading Bollywood tracks...
             </p>
             <p className="text-sm text-muted-foreground">
-              If tracks don't load, check the browser console. The app will show demo tracks if the music API is unavailable.
+              If tracks don't load, check the browser console. The app will use YouTube Music to find tracks.
             </p>
           </CardContent>
         </Card>
@@ -45,7 +45,7 @@ const TopTracksSection = ({ topTracks, onPlayTrack, loading }) => {
 
   return (
     <section>
-      <h2 className="text-2xl font-bold text-foreground mb-6">Your Top Tracks</h2>
+      <h2 className="text-2xl font-bold text-foreground mb-6">Top Bollywood Tracks</h2>
       <div className="space-y-2">
         {topTracks.slice(0, 8).map((track, index) => (
           <Card
@@ -58,17 +58,20 @@ const TopTracksSection = ({ topTracks, onPlayTrack, loading }) => {
                 {index + 1}
               </span>
               <img
-                src={track.image || track.album?.images?.[0]?.url}
+                src={track.image || track.youtube_image || (track.album?.images && track.album.images[0]?.url)}
                 alt={track.name}
                 className="h-12 w-12 rounded object-cover"
                 onError={(e) => {
-                  e.target.src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=48&h=48&fit=crop';
+                  // Use default YouTube thumbnail if image fails to load
+                  e.target.src = 'https://i.ytimg.com/vi/default/default.jpg';
                 }}
               />
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-foreground truncate">{track.name}</h3>
+                <h3 className="font-medium text-foreground truncate">
+                  {track.name || 'Unknown Track'}
+                </h3>
                 <p className="text-sm text-muted-foreground truncate">
-                  {track.artist || track.artists?.[0]?.name}
+                  {track.artist || (track.artists && track.artists[0]?.name) || 'Unknown Artist'}
                   {track.source && <span className="ml-2 opacity-50">({track.source})</span>}
                 </p>
               </div>
@@ -77,7 +80,7 @@ const TopTracksSection = ({ topTracks, onPlayTrack, loading }) => {
                   <Heart className="h-4 w-4" />
                 </Button>
                 <span className="text-sm text-muted-foreground">
-                  {track.duration || formatDuration(track.duration_ms)}
+                  {track.duration || formatDuration(track.duration_ms) || '0:00'}
                 </span>
                 <Button variant="ghost" size="icon">
                   <MoreHorizontal className="h-4 w-4" />
@@ -94,9 +97,25 @@ const TopTracksSection = ({ topTracks, onPlayTrack, loading }) => {
 // Helper function to format duration from milliseconds
 const formatDuration = (durationMs) => {
   if (!durationMs) return '0:00';
-  const minutes = Math.floor(durationMs / 60000);
-  const seconds = Math.floor((durationMs % 60000) / 1000);
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  
+  try {
+    // Handle string values that might be passed
+    if (typeof durationMs === 'string') {
+      // If it's already in MM:SS format, return as is
+      if (durationMs.includes(':')) return durationMs;
+      
+      // Try to convert to a number
+      durationMs = parseInt(durationMs, 10);
+      if (isNaN(durationMs)) return '0:00';
+    }
+    
+    const minutes = Math.floor(durationMs / 60000);
+    const seconds = Math.floor((durationMs % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  } catch (error) {
+    console.error('Error formatting duration:', error);
+    return '0:00';
+  }
 };
 
 export default TopTracksSection;
