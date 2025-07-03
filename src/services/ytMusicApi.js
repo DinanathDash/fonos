@@ -342,7 +342,18 @@ class YTMusicApiService {
   
   // Get genres/categories
   async getGenres() {
+    // Check cache first
+    const cacheKey = 'all-genres';
+    if (this.cache.genres.has(cacheKey)) {
+      const cached = this.cache.genres.get(cacheKey);
+      if (Date.now() - cached.timestamp < this.cacheExpiration) {
+        console.log('Using cached genres data');
+        return cached.data;
+      }
+    }
+    
     try {
+      console.log('Fetching genres from API');
       const response = await fetch(`${this.apiBaseUrl}/genres`);
       
       if (!response.ok) {
@@ -350,6 +361,13 @@ class YTMusicApiService {
       }
       
       const genres = await response.json();
+      
+      // Cache the result
+      this.cache.genres.set(cacheKey, {
+        data: genres,
+        timestamp: Date.now()
+      });
+      
       return genres;
     } catch (error) {
       console.error('Error fetching genres:', error);
@@ -470,16 +488,16 @@ class YTMusicApiService {
         
         return track.artists.map(artist => ({
           id: artist?.id || '',
-          name: artist?.name || 'Unknown Artist'
+          name: artist?.name || 'Artist'
         }));
       };
       
       const artists = safeGetArtists();
-      const artistNames = artists.map(a => a.name).join(', ') || 'Unknown Artist';
+      const artistNames = artists.map(a => a.name).join(', ') || 'Artist';
       
       const albumObj = track.album ? {
         id: track.album?.id || '',
-        name: track.album?.name || 'Unknown Album',
+        name: track.album?.name || 'Album',
         images: Array.isArray(track.thumbnails) ? track.thumbnails : []
       } : null;
       
@@ -492,29 +510,44 @@ class YTMusicApiService {
       // Default thumbnail if none available
       const defaultThumbnail = 'https://i.ytimg.com/vi/default/default.jpg';
       
+      // Make sure we have a valid duration
+      let duration = '0:00';
+      let duration_ms = 0;
+      
+      if (track.duration) {
+        duration = track.duration;
+        duration_ms = this.convertDurationToMs(track.duration);
+      } else if (track.lengthSeconds) {
+        // Convert seconds to MM:SS format
+        const minutes = Math.floor(track.lengthSeconds / 60);
+        const seconds = track.lengthSeconds % 60;
+        duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        duration_ms = track.lengthSeconds * 1000;
+      }
+      
       return {
         id: track.videoId || '',
-        name: track.title || 'Unknown Track',
+        name: track.title || 'Track',
         artist: artistNames,
         artists: artists,
         album: albumObj,
-        duration: track.duration || '0:00',
-        duration_ms: this.convertDurationToMs(track.duration),  // Our fixed function handles all cases
+        duration: duration,
+        duration_ms: duration_ms,
         image: thumbnailUrl || defaultThumbnail,
         youtube_id: track.videoId || '',
         youtube_image: thumbnailUrl || defaultThumbnail,
         audio_url: track.watchUrl || (track.videoId ? `https://www.youtube.com/watch?v=${track.videoId}` : ''),
         embed_url: track.embedUrl || (track.videoId ? `https://www.youtube.com/embed/${track.videoId}` : ''),
         isDemo: false,
-        source: 'YouTube Music'
+        source: ''
       };
     } catch (error) {
       console.error('Error normalizing track data:', error, track);
       // Return minimal object to avoid breaking the UI
       return {
         id: track.videoId || '',
-        name: track.title || 'Unknown Track',
-        artist: 'Unknown Artist',
+        name: track.title || 'Track',
+        artist: 'Artist',
         artists: [],
         duration: '0:00',
         duration_ms: 0,
@@ -522,7 +555,7 @@ class YTMusicApiService {
         youtube_id: track.videoId || '',
         youtube_image: 'https://i.ytimg.com/vi/default/default.jpg',
         isDemo: false,
-        source: 'YouTube Music'
+        source: ''
       };
     }
   }

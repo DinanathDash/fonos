@@ -3,6 +3,11 @@ import MainLayout from '../layouts/MainLayout';
 import Home from '../pages/Home';
 import Search from '../pages/Search';
 import Library from '../pages/Library';
+import Playlist from '../pages/Playlist';
+import Album from '../pages/Album';
+import Artist from '../pages/Artist';
+import Profile from '../pages/Profile';
+import Settings from '../pages/Settings';
 
 export const router = createBrowserRouter([
   {
@@ -21,34 +26,29 @@ export const router = createBrowserRouter([
         path: 'library',
         element: <Library />
       },
-      // Add more routes as needed
       {
         path: 'playlist/:id',
-        element: <div>Playlist Page - Coming Soon</div>
+        element: <Playlist />
       },
       {
         path: 'album/:id',
-        element: <div>Album Page - Coming Soon</div>
+        element: <Album />
       },
       {
         path: 'artist/:id',
-        element: <div>Artist Page - Coming Soon</div>
+        element: <Artist />
       },
       {
         path: 'liked',
-        element: <div>Liked Songs Page - Coming Soon</div>
-      },
-      {
-        path: 'recent',
-        element: <div>Recently Played Page - Coming Soon</div>
+        element: <Playlist /> // We can reuse the Playlist component for Liked Songs
       },
       {
         path: 'profile',
-        element: <div>Profile Page - Coming Soon</div>
+        element: <Profile />
       },
       {
         path: 'settings',
-        element: <div>Settings Page - Coming Soon</div>
+        element: <Settings />
       }
     ]
   },

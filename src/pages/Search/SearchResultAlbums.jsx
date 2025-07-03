@@ -1,5 +1,6 @@
 import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
+import MarqueeText from '../../components/ui/marquee-text';
 
 const SearchResultAlbums = ({ albums = [] }) => {
   if (!albums.length) {
@@ -33,12 +34,12 @@ const SearchResultAlbums = ({ albums = [] }) => {
             </div>
             
             <div className="space-y-1">
-              <h4 className="font-medium text-sm text-foreground line-clamp-2">
+              <MarqueeText className="font-medium text-sm text-foreground">
                 {album.title}
-              </h4>
-              <p className="text-xs text-muted-foreground line-clamp-1">
+              </MarqueeText>
+              <MarqueeText className="text-xs text-muted-foreground">
                 {album.artist}
-              </p>
+              </MarqueeText>
               
               {album.playcount && (
                 <Badge variant="secondary" className="text-xs">

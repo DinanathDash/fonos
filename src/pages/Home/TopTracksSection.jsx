@@ -1,6 +1,8 @@
-import { Heart, MoreHorizontal } from 'lucide-react';
+import { Heart, MoreHorizontal, Play, Music } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
+import { cn } from '../../lib/utils';
+import MarqueeText from '../../components/ui/marquee-text';
 
 const TopTracksSection = ({ topTracks, onPlayTrack, loading }) => {
   if (loading) {
@@ -28,10 +30,17 @@ const TopTracksSection = ({ topTracks, onPlayTrack, loading }) => {
   if (!topTracks || topTracks.length === 0) {
     return (
       <section>
-        <h2 className="text-2xl font-bold text-foreground mb-6">Top Bollywood Tracks</h2>
-        <Card>
-          <CardContent className="p-6 text-center">
-            <p className="text-muted-foreground mb-2">
+        <h2 className="text-2xl font-bold text-foreground mb-6">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+            Top Bollywood Tracks
+          </span>
+        </h2>
+        <Card className="border border-white/10">
+          <CardContent className="p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+              <Music className="h-8 w-8 text-primary" />
+            </div>
+            <p className="text-lg text-foreground mb-2">
               🎵 Loading Bollywood tracks...
             </p>
             <p className="text-sm text-muted-foreground">
@@ -45,47 +54,82 @@ const TopTracksSection = ({ topTracks, onPlayTrack, loading }) => {
 
   return (
     <section>
-      <h2 className="text-2xl font-bold text-foreground mb-6">Top Bollywood Tracks</h2>
+      <h2 className="text-2xl font-bold mb-6 group flex items-center">
+        <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+          Top Bollywood Tracks
+        </span>
+        <div className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="rounded-full text-xs h-7 px-3 border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary"
+          >
+            View All
+          </Button>
+        </div>
+      </h2>
+      
       <div className="space-y-2">
         {topTracks.slice(0, 8).map((track, index) => (
           <Card
-            key={track.id || index}
-            className="cursor-pointer transition-colors hover:bg-accent/50 group"
+            key={`top-track-${index}-${track.id || ''}`}
+            className="cursor-pointer transition-all hover:bg-accent/30 hover:border-primary/20 group border border-transparent"
             onClick={() => onPlayTrack(track)}
           >
-            <CardContent className="flex items-center space-x-4 p-3">
-              <span className="text-muted-foreground text-sm w-4 text-center">
+            <CardContent className="flex items-center p-3 relative overflow-hidden">
+              {/* Rank */}
+              <span className="text-muted-foreground w-8 text-center font-mono">
                 {index + 1}
               </span>
-              <img
-                src={track.image || track.youtube_image || (track.album?.images && track.album.images[0]?.url)}
-                alt={track.name}
-                className="h-12 w-12 rounded object-cover"
-                onError={(e) => {
-                  // Use default YouTube thumbnail if image fails to load
-                  e.target.src = 'https://i.ytimg.com/vi/default/default.jpg';
-                }}
-              />
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-foreground truncate">
-                  {track.name || 'Unknown Track'}
-                </h3>
-                <p className="text-sm text-muted-foreground truncate">
-                  {track.artist || (track.artists && track.artists[0]?.name) || 'Unknown Artist'}
-                  {track.source && <span className="ml-2 opacity-50">({track.source})</span>}
-                </p>
+              
+              {/* Album Art */}
+              <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded group-hover:shadow-md group-hover:shadow-primary/20">
+                <img
+                  src={track.image || track.youtube_image || (track.album?.images && track.album.images[0]?.url)}
+                  alt={track.name}
+                  className="h-12 w-12 object-cover transition-transform duration-500 group-hover:scale-110"
+                  onError={(e) => {
+                    // Use default YouTube thumbnail if image fails to load
+                    e.target.src = 'https://i.ytimg.com/vi/default/default.jpg';
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Play className="h-5 w-5 text-white" />
+                </div>
               </div>
-              <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button variant="ghost" size="icon">
-                  <Heart className="h-4 w-4" />
-                </Button>
-                <span className="text-sm text-muted-foreground">
+              
+              {/* Track Info */}
+              <div className="flex-1 min-w-0 px-4">
+                <MarqueeText className="font-medium text-foreground">
+                  {track.name || track.title || 'Track'}
+                </MarqueeText>
+                <MarqueeText className="text-sm text-muted-foreground">
+                  {track.artist || (track.artists && track.artists[0]?.name) || 'Artist'}
+                  {track.source ? <span className="ml-2 opacity-50 text-xs">({track.source})</span> : null}
+                </MarqueeText>
+              </div>
+              
+              {/* Track Controls */}
+              <div className="flex items-center space-x-2">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-white/10">
+                    <Heart className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                
+                <span className="text-sm text-muted-foreground tabular-nums">
                   {track.duration || formatDuration(track.duration_ms) || '0:00'}
                 </span>
-                <Button variant="ghost" size="icon">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-white/10">
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
+              
+              {/* Hover Indicator */}
+              <div className="absolute left-0 top-0 w-1 h-full bg-primary scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-bottom"></div>
             </CardContent>
           </Card>
         ))}
@@ -96,17 +140,27 @@ const TopTracksSection = ({ topTracks, onPlayTrack, loading }) => {
 
 // Helper function to format duration from milliseconds
 const formatDuration = (durationMs) => {
-  if (!durationMs) return '0:00';
+  if (durationMs === undefined || durationMs === null) return '0:00';
   
   try {
-    // Handle string values that might be passed
+    // If it's already a properly formatted string with a colon, return as is
+    if (typeof durationMs === 'string' && durationMs.includes(':')) {
+      // Validate format is MM:SS
+      const parts = durationMs.split(':');
+      if (parts.length === 2 && !isNaN(parseInt(parts[0])) && !isNaN(parseInt(parts[1]))) {
+        return durationMs;
+      }
+    }
+    
+    // Convert to number if it's a string number
     if (typeof durationMs === 'string') {
-      // If it's already in MM:SS format, return as is
-      if (durationMs.includes(':')) return durationMs;
-      
-      // Try to convert to a number
       durationMs = parseInt(durationMs, 10);
       if (isNaN(durationMs)) return '0:00';
+    }
+    
+    // If duration is in seconds (less than 5000), convert to ms
+    if (durationMs < 5000 && durationMs > 0) {
+      durationMs *= 1000;
     }
     
     const minutes = Math.floor(durationMs / 60000);

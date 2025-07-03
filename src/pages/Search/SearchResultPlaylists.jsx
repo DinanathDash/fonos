@@ -1,6 +1,7 @@
 import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Play } from 'lucide-react';
+import MarqueeText from '../../components/ui/marquee-text';
 
 const SearchResultPlaylists = ({ playlists = [] }) => {
   if (!playlists.length) {
@@ -41,12 +42,12 @@ const SearchResultPlaylists = ({ playlists = [] }) => {
             </div>
             
             <div className="space-y-1">
-              <h4 className="font-medium text-sm text-foreground line-clamp-2">
+              <MarqueeText className="font-medium text-sm text-foreground">
                 {playlist.title}
-              </h4>
-              <p className="text-xs text-muted-foreground line-clamp-2">
+              </MarqueeText>
+              <MarqueeText className="text-xs text-muted-foreground">
                 {playlist.description}
-              </p>
+              </MarqueeText>
               
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="text-xs">

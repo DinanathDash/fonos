@@ -1,5 +1,6 @@
 import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
+import MarqueeText from '../../components/ui/marquee-text';
 
 const SearchResultArtists = ({ artists }) => {
   return (
@@ -14,7 +15,7 @@ const SearchResultArtists = ({ artists }) => {
                 className="w-full aspect-square rounded-full object-cover"
               />
             </div>
-            <h3 className="font-medium text-foreground truncate">{artist.name}</h3>
+            <MarqueeText className="font-medium text-foreground">{artist.name}</MarqueeText>
             <Badge variant="secondary" className="mt-1">Artist</Badge>
           </CardContent>
         </Card>

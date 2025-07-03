@@ -50,10 +50,133 @@ app.use(async (req, res, next) => {
 const formatResult = (result) => {
   if (!result) return result;
   
-  if (result.videoId) {
-    result.embedUrl = `https://www.youtube.com/embed/${result.videoId}`;
-    result.watchUrl = `https://www.youtube.com/watch?v=${result.videoId}`;
+  // First, ensure we have a valid videoId from any source
+  const videoId = result.videoId || result.id || result.youtube_id;
+  
+  // For album or playlist results, try to get a videoId from tracks if available
+  if (!videoId && (result.type === 'ALBUM' || result.type === 'PLAYLIST')) {
+    // Check if we have tracks directly
+    if (result.tracks && result.tracks.length > 0) {
+      // Use the first track's videoId if available
+      const firstTrackWithId = result.tracks.find(track => track.videoId || track.id);
+      if (firstTrackWithId) {
+        result.videoId = firstTrackWithId.videoId || firstTrackWithId.id;
+      }
+    } 
+    // For album results, sometimes we need to use the playlistId
+    else if (result.playlistId) {
+      console.log(`Converting album/playlist to playable track using playlistId: ${result.playlistId}`);
+      // Use the playlistId as a fallback - this will at least make it clickable to view the playlist
+      result.videoId = result.playlistId;
+    }
+  }
+  
+  // Final check for videoId
+  const finalVideoId = result.videoId || result.id || result.youtube_id;
+  
+  if (finalVideoId) {
+    console.log(`Formatting track with ID: ${finalVideoId}, title: ${result.title || result.name || 'no title'}`);
+    
+    // Set explicit properties needed for playback - standardize across different property names
+    result.videoId = finalVideoId;
+    result.youtube_id = finalVideoId;
+    result.id = finalVideoId;
+    
+    // Log the original artist format to help with debugging
+    console.log(`Artist before formatting: ${JSON.stringify(result.artist)}`); 
+    
+    result.embedUrl = `https://www.youtube.com/embed/${finalVideoId}`;
+    result.embed_url = `https://www.youtube.com/embed/${finalVideoId}`;
+    result.watchUrl = `https://www.youtube.com/watch?v=${finalVideoId}`;
+    result.audio_url = `https://www.youtube.com/watch?v=${finalVideoId}`;
     result.isAudioAvailable = true;
+    
+    // Ensure duration is set
+    if (!result.duration && result.lengthSeconds) {
+      const minutes = Math.floor(result.lengthSeconds / 60);
+      const seconds = result.lengthSeconds % 60;
+      result.duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      // Also set duration_ms for proper time display
+      result.duration_ms = result.lengthSeconds * 1000;
+    } else if (!result.duration) {
+      result.duration = "3:00"; // Default duration if none is provided
+      result.duration_ms = 180000; // 3 minutes in ms
+    }
+    
+    // Make sure we have a title
+    if (!result.title) {
+      result.title = result.name || "Track";
+    }
+    
+    // Also set name field for consistency
+    if (!result.name) {
+      result.name = result.title;
+    }
+    
+    // Handle artist information - ensure it exists in all formats
+    
+    // First, normalize artist if it's an object
+    if (typeof result.artist === 'object' && result.artist !== null) {
+      if (result.artist.name) {
+        result.artist = result.artist.name;
+      } else if (Array.isArray(result.artist)) {
+        // Handle case where artist might be an array
+        result.artist = result.artist.map(a => typeof a === 'string' ? a : (a && a.name) || '').filter(Boolean).join(', ');
+        if (!result.artist) result.artist = "Artist";
+      } else {
+        result.artist = "Artist";
+      }
+    }
+    
+    // Ensure artist is a string at this point
+    if (typeof result.artist !== 'string') {
+      result.artist = "Artist";
+    }
+    
+    if (result.artists && result.artists.length > 0) {
+      // We have artists array, extract artist name if needed
+      if (!result.artist || result.artist === "Artist") {
+        result.artist = result.artists.map(a => a.name || '').filter(Boolean).join(', ');
+        if (!result.artist) result.artist = "Artist";
+      }
+    } else if (result.artist && typeof result.artist === 'string') {
+      // We have artist string but no artists array
+      result.artists = [{ name: result.artist }];
+    } else {
+      // No artist info at all
+      result.artist = "Artist";
+      result.artists = [{ name: "Artist" }];
+    }
+    
+    // Extract artist from title if still missing proper artist info
+    if (((typeof result.artist === 'string' && result.artist === "Artist") || typeof result.artist !== 'string') && 
+        result.title && result.title.includes(' - ')) {
+      const parts = result.title.split(' - ');
+      if (parts.length >= 2) {
+        // Check if format is "Artist - Title" or "Title - Artist"
+        const potentialArtist = parts[parts.length - 1].trim();
+        if (potentialArtist && potentialArtist.length < 30) { // Reasonable length for artist name
+          result.artist = potentialArtist;
+          result.artists = [{ name: potentialArtist }];
+        }
+      }
+    }
+    
+    // Remove "YouTube Music" from title
+    if (result.title && result.title.includes(" (YouTube Music)")) {
+      result.title = result.title.replace(" (YouTube Music)", "");
+      result.name = result.title;
+    }
+    
+    // Ensure artist is a string for logging
+    const artistForLog = typeof result.artist === 'string' ? result.artist : 
+                         (result.artist && typeof result.artist === 'object' && result.artist.name) ? 
+                         result.artist.name : 'Unknown Artist';
+    
+    // Log what we're returning for debugging
+    console.log(`Track formatted: ${result.name} by ${artistForLog} (ID: ${finalVideoId})`);
+  } else {
+    console.warn('Track missing videoId:', result);
   }
   
   return result;
@@ -237,10 +360,112 @@ app.get('/api/ytmusic/home', async (req, res) => {
     // We'll create a custom home page content from various YouTube Music resources
     // Using search instead of direct API calls which might not exist in the library
     const [topTracks, featuredPlaylists, newReleases] = await Promise.all([
-      // Search for top songs instead of using getCharts
-      ytmusic.search('top songs', { filter: 'songs', limit: 20 })
-        .then(results => results.map(track => formatResult(track)))
-        .catch(() => []),
+      // Search specifically for Bollywood tracks for top songs section
+      Promise.all([
+        ytmusic.search('popular bollywood songs 2024', { filter: 'songs', limit: 15 }),
+        ytmusic.search('bollywood hits', { filter: 'songs', limit: 15 }),
+        ytmusic.search('best bollywood songs', { filter: 'songs', limit: 15 })
+      ])
+        .then(async ([results1, results2, results3]) => {
+          // Combine all results
+          const allResults = [...results1, ...results2, ...results3];
+          console.log('Found total Bollywood tracks across searches:', allResults.length);
+          
+          // First, filter out any results that don't have a videoId (like albums or playlists)
+          let playableTracks = allResults.filter(track => track.videoId || track.id);
+          
+          // Deduplicate the tracks by videoId to prevent duplicates in the UI
+          const videoIdMap = new Map();
+          playableTracks = playableTracks.filter(track => {
+            const videoId = track.videoId || track.id;
+            if (!videoId) return false;
+            
+            if (videoIdMap.has(videoId)) {
+              return false; // Already have this track, skip it
+            } else {
+              videoIdMap.set(videoId, true);
+              return true;
+            }
+          });
+          console.log('Playable tracks after filtering:', playableTracks.length);
+          
+          // If we still don't have enough tracks, try more specific search queries
+          if (playableTracks.length < 10) {
+            console.log('Not enough playable tracks, trying additional searches...');
+            try {
+              const [altResults1, altResults2] = await Promise.all([
+                ytmusic.search('arijit singh hits', { filter: 'songs', limit: 10 }),
+                ytmusic.search('neha kakkar songs', { filter: 'songs', limit: 10 })
+              ]);
+              
+              const altPlayableTracks = [...altResults1, ...altResults2].filter(track => track.videoId || track.id);
+              playableTracks = [...playableTracks, ...altPlayableTracks].slice(0, 20);
+              console.log('Total playable tracks after additional searches:', playableTracks.length);
+            } catch (error) {
+              console.error('Error in additional searches:', error);
+            }
+          }
+          
+          // Ensure each track has necessary data formatted properly
+          return playableTracks.map(track => {
+            const formattedTrack = formatResult(track);
+            
+            // Log the track data to help with debugging
+            console.log('Track videoId:', formattedTrack.videoId);
+            
+            // Make sure we have a valid title
+            if (!formattedTrack.title || formattedTrack.title.toLowerCase().includes('unknown')) {
+              formattedTrack.title = track.title || 'Bollywood Track';
+            }
+            
+            // Always ensure artist is a string before operations
+            if (typeof formattedTrack.artist === 'object' && formattedTrack.artist !== null) {
+              // If it's an object with a name property, use that
+              if (formattedTrack.artist.name) {
+                formattedTrack.artist = formattedTrack.artist.name;
+              } else {
+                // If no name property, set a default
+                formattedTrack.artist = 'Bollywood Artist';
+              }
+            }
+            
+            // Extract artist name from video title if missing or 'unknown'
+            if (!formattedTrack.artist || 
+                (typeof formattedTrack.artist === 'string' && 
+                 formattedTrack.artist.toLowerCase().includes('unknown'))) {
+              // Try to extract artist from title (Title - Artist format)
+              const titleParts = formattedTrack.title.split(' - ');
+              if (titleParts.length > 1) {
+                formattedTrack.artist = titleParts[1].trim();
+              } else {
+                formattedTrack.artist = 'Bollywood Artist';
+              }
+            }
+            
+            // Make sure artist is properly formatted
+            if (!formattedTrack.artists || formattedTrack.artists.length === 0) {
+              formattedTrack.artists = [{ name: formattedTrack.artist || 'Bollywood Artist' }];
+            }
+            
+            // Ensure we have all the necessary IDs for playback
+            formattedTrack.id = formattedTrack.videoId;
+            formattedTrack.youtube_id = formattedTrack.videoId;
+            
+            // Final check for playability - if still no videoId, log it and skip this track
+            if (!formattedTrack.videoId) {
+              console.warn('Track still missing videoId after formatting:', formattedTrack.title);
+              return null; // Will be filtered out below
+            }
+            
+            return formattedTrack;
+          })
+          // Filter out any null tracks from our check above
+          .filter(track => track !== null);
+        })
+        .catch((error) => {
+          console.error('Error searching for Bollywood tracks:', error);
+          return [];
+        }),
         
       // Search for popular playlists instead of using getMoodsAndGenres
       ytmusic.search('popular playlists', { filter: 'playlists', limit: 10 })
@@ -314,23 +539,56 @@ app.get('/api/ytmusic/genres', async (req, res) => {
     const genreQueries = [
       'pop music', 'rock music', 'hip hop', 'electronic music',
       'r&b music', 'indie music', 'jazz music', 'classical music',
-      'country music', 'latin music', 'bollywood music'
+      'country music', 'latin music', 'bollywood music', 'edm music',
+      'metal music', 'reggae music', 'folk music', 'blues music'
     ];
     
-    // Transform to a more usable format
-    const genres = [
-      {
-        id: 'popular-genres',
-        name: 'Popular Genres',
-        items: genreQueries.map(query => ({
-          id: query.replace(/\s+/g, '-').toLowerCase(),
-          name: query.charAt(0).toUpperCase() + query.slice(1),
-          color: '#' + Math.floor(Math.random()*16777215).toString(16) // Random color
-        }))
-      }
-    ];
+    // Transform to a flat array format that BrowseGenres component expects
+    const genres = genreQueries.map(query => {
+      // Extract just the genre name without "music"
+      let displayName = query.replace(' music', '');
+      displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+      
+      return {
+        id: query.replace(/\s+/g, '-').toLowerCase(),
+        name: displayName,
+        // Define specific colors for some genres for better visual consistency
+        color: getGenreColor(displayName)
+      };
+    });
+    
+    // Add a "Popular Genres" item at the beginning
+    genres.unshift({
+      id: 'popular-genres',
+      name: 'Popular Genres',
+      color: 'from-red-500 to-pink-600'
+    });
     
     res.json(genres);
+    
+    // Helper function to assign consistent colors to genres
+    function getGenreColor(genre) {
+      const colorMap = {
+        'Pop': 'from-blue-500 to-indigo-600',
+        'Rock': 'from-red-500 to-pink-600',
+        'Hip hop': 'from-green-500 to-emerald-600',
+        'Electronic': 'from-yellow-500 to-orange-600',
+        'R&b': 'from-purple-500 to-violet-600',
+        'Indie': 'from-teal-500 to-cyan-600',
+        'Jazz': 'from-amber-500 to-orange-600',
+        'Classical': 'from-rose-500 to-red-600',
+        'Country': 'from-indigo-500 to-blue-600',
+        'Latin': 'from-stone-600 to-zinc-800',
+        'Bollywood': 'from-rose-500 to-red-600',
+        'Edm': 'from-cyan-500 to-blue-600',
+        'Metal': 'from-slate-700 to-slate-900',
+        'Reggae': 'from-green-600 to-lime-500',
+        'Folk': 'from-amber-700 to-yellow-600',
+        'Blues': 'from-blue-700 to-indigo-800'
+      };
+      
+      return colorMap[genre] || 'from-gray-500 to-gray-700';
+    }
   } catch (error) {
     console.error('Error fetching genres:', error);
     res.status(500).json({ error: 'Failed to fetch genres', details: error.message });

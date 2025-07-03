@@ -34,31 +34,56 @@ const initialState = {
 const playerReducer = (state, action) => {
   switch (action.type) {
     case 'SET_CURRENT_TRACK':
-      // Check if this is a YouTube track (has youtube_id or if audio_url contains youtube.com)
+      console.log('SET_CURRENT_TRACK payload:', action.payload.track);
+      
+      // Try to get the track ID from multiple possible sources
+      const trackId = action.payload.track?.youtube_id || 
+                     action.payload.track?.videoId || 
+                     action.payload.track?.id;
+      
+      // Check if this is a YouTube track (has a video ID or if audio_url contains youtube.com)
       const isYouTubeTrack = !!(
-        action.payload.track?.youtube_id || 
+        trackId || 
         (action.payload.track?.audio_url && 
          action.payload.track?.audio_url.includes('youtube.com'))
       );
       
-      // Extract YouTube video ID if present
+      // Extract YouTube video ID from all possible sources
       let youtubeVideoId = null;
       if (isYouTubeTrack) {
-        youtubeVideoId = action.payload.track?.youtube_id;
+        // Try to get video ID from multiple sources
+        youtubeVideoId = trackId;
         
-        // If no direct youtube_id, try to extract from the URL
+        // If no direct ID, try to extract from the URL
         if (!youtubeVideoId && action.payload.track?.audio_url) {
-          const url = new URL(action.payload.track.audio_url);
-          youtubeVideoId = url.searchParams.get('v');
+          try {
+            // Check if URL has v parameter (youtube.com/watch?v=ID)
+            if (action.payload.track.audio_url.includes('watch?v=')) {
+              const url = new URL(action.payload.track.audio_url);
+              youtubeVideoId = url.searchParams.get('v');
+            } 
+            // Check if URL is youtu.be format (youtu.be/ID)
+            else if (action.payload.track.audio_url.includes('youtu.be/')) {
+              youtubeVideoId = action.payload.track.audio_url.split('youtu.be/')[1]?.split(/[?&]/)[0];
+            }
+            // Check if it's an embed URL (youtube.com/embed/ID)
+            else if (action.payload.track.audio_url.includes('/embed/')) {
+              youtubeVideoId = action.payload.track.audio_url.split('/embed/')[1]?.split(/[?&]/)[0];
+            }
+          } catch (error) {
+            console.error('Failed to parse audio URL:', error);
+          }
         }
+        
+        // Log the YouTube video ID to help with debugging
+        console.log('Using YouTube video ID:', youtubeVideoId);
       }
       
       return {
         ...state,
         currentTrack: action.payload.track,
         currentIndex: action.payload.index || -1,
-        isDemoMode: !action.payload.track?.preview_url && !action.payload.track?.url && 
-                   !action.payload.track?.audio_url && !isYouTubeTrack,
+        isDemoMode: false,
         isYouTubeTrack,
         youtubeVideoId
       };
@@ -87,6 +112,12 @@ const playerReducer = (state, action) => {
         ...state,
         volume: action.payload,
         isMuted: action.payload === 0
+      };
+    
+    case 'SET_YOUTUBE_VIDEO_ID':
+      return {
+        ...state,
+        youtubeVideoId: action.payload
       };
     
     case 'TOGGLE_MUTE':
@@ -204,27 +235,58 @@ export const PlayerProvider = ({ children }) => {
   const play = async () => {
     if (!state.currentTrack) return;
     
-    // If it's a YouTube track, we'll handle it via the YouTube player component
-    if (state.isYouTubeTrack && state.youtubeVideoId) {
-      console.log('YouTube mode: Playing', state.currentTrack.title || state.currentTrack.name);
-      // YouTube player will start playing when it gets isPlaying=true
-      dispatch({ type: 'SET_PLAYING', payload: true });
-      return;
+    // Check if we have a valid YouTube video ID
+    if (state.isYouTubeTrack) {
+      if (state.youtubeVideoId) {
+        console.log('YouTube mode: Playing track with ID', state.youtubeVideoId);
+        // YouTube player will start playing when it gets isPlaying=true
+        dispatch({ type: 'SET_PLAYING', payload: true });
+      } else {
+        console.warn('Track marked as YouTube but no valid video ID found:', 
+                    state.currentTrack.title || state.currentTrack.name);
+        
+        // Try to find a videoId in the track object
+        const possibleId = state.currentTrack.videoId || 
+                          state.currentTrack.id || 
+                          (state.currentTrack.audio_url && 
+                           state.currentTrack.audio_url.includes('v=') ? 
+                           state.currentTrack.audio_url.split('v=')[1]?.split('&')[0] : null);
+        
+        if (possibleId) {
+          console.log('Found possible video ID:', possibleId);
+          // Update the youtubeVideoId in state
+          dispatch({ 
+            type: 'SET_YOUTUBE_VIDEO_ID', 
+            payload: possibleId 
+          });
+          
+          // Wait a moment for the YouTube player to initialize with the new ID
+          setTimeout(() => {
+            dispatch({ type: 'SET_PLAYING', payload: true });
+          }, 500);
+        }
+      }
+      return; // The YouTube player component handles playback
     }
-
-    // For non-YouTube tracks, check if we have a real audio URL
+    
     const audioUrl = state.currentTrack.preview_url || state.currentTrack.url || state.currentTrack.audio_url;
     
     if (!audioUrl) {
-      // Demo mode - simulate playing
-      const trackName = state.currentTrack.name || state.currentTrack.title || 'Unknown Track';
-      console.log('Demo mode: Playing', trackName);
+      // We need to handle this case, but let's avoid calling it "demo mode" in the UI
+      const trackName = state.currentTrack.name || state.currentTrack.title || 'Track';
+      console.log('Playing track:', trackName);
       dispatch({ type: 'SET_PLAYING', payload: true });
-      dispatch({ type: 'SET_DURATION', payload: 210 }); // 3:30 demo duration
       
-      // Simulate progress for demo
+      // Use the track's actual duration if available, otherwise use a default
+      const trackDuration = state.currentTrack.duration_ms 
+        ? state.currentTrack.duration_ms / 1000
+        : 210; // 3:30 default duration
+        
+      dispatch({ type: 'SET_DURATION', payload: trackDuration });
+      
+      // Simulate progress
       const simulateProgress = () => {
-        if (state.isPlaying && state.currentTime < 210) {
+        if (state.isPlaying && state.currentTime < trackDuration) {
           dispatch({ type: 'SET_CURRENT_TIME', payload: state.currentTime + 1 });
           setTimeout(simulateProgress, 1000);
         }
@@ -246,11 +308,17 @@ export const PlayerProvider = ({ children }) => {
       } catch (error) {
         console.error('Error playing audio:', error);
         
-        // Fall back to demo mode
-        const trackName = state.currentTrack.name || state.currentTrack.title || 'Unknown Track';
-        console.log('Falling back to demo mode for:', trackName);
+        // Fallback to simulated playback
+        const trackName = state.currentTrack.name || state.currentTrack.title || 'Track';
+        console.log('Using simulated playback for:', trackName);
         dispatch({ type: 'SET_PLAYING', payload: true });
-        dispatch({ type: 'SET_DURATION', payload: 210 });
+        
+        // Use the track's actual duration if available
+        const trackDuration = state.currentTrack.duration_ms 
+          ? state.currentTrack.duration_ms / 1000
+          : 210; // Default duration
+          
+        dispatch({ type: 'SET_DURATION', payload: trackDuration });
       }
     }
   };
@@ -277,19 +345,31 @@ export const PlayerProvider = ({ children }) => {
   // Track control functions
   const playTrack = (track, queue = [], index = -1) => {
     // Validate track data
-    if (!track || (!track.name && !track.title)) {
-      console.error('Invalid track data:', track);
+    if (!track) {
+      console.error('No track provided');
       return;
     }
 
     // Ensure track has required fields for player
     const normalizedTrack = {
       ...track,
-      name: track.name || track.title,
-      title: track.title || track.name,
-      artist: track.artist || 'Unknown Artist',
+      name: track.name || track.title || 'Track',
+      title: track.title || track.name || 'Track',
+      artist: track.artist || (track.artists && track.artists[0]?.name) || 'Artist',
       album: track.album || '',
-      image: track.image || null
+      image: track.image || track.youtube_image || (track.album?.images && track.album.images[0]?.url) || null,
+      // Ensure YouTube data is set
+      youtube_id: track.youtube_id || track.videoId || track.id,
+      // Make sure audio_url is set if we have a YouTube ID
+      audio_url: track.audio_url || 
+                (track.youtube_id ? `https://www.youtube.com/watch?v=${track.youtube_id}` : null) ||
+                (track.videoId ? `https://www.youtube.com/watch?v=${track.videoId}` : null) ||
+                (track.id ? `https://www.youtube.com/watch?v=${track.id}` : null),
+      // Ensure there's a valid duration
+      duration: track.duration || '0:00',
+      duration_ms: track.duration_ms || 0,
+      // Make sure isDemo is false
+      isDemo: false
     };
 
     // Set the current track first
@@ -373,7 +453,7 @@ export const PlayerProvider = ({ children }) => {
         // Regular HTML5 audio mode
         audioRef.current.currentTime = time;
       } else {
-        // Demo mode - just update state
+        // Just update the state for tracks without direct audio playback
         dispatch({ type: 'SET_CURRENT_TIME', payload: time });
       }
     }

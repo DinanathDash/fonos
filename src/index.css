@@ -3,6 +3,83 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  85% {
+    transform: translateX(calc(-100% + 100%));
+  }
+  95% {
+    transform: translateX(calc(-100% + 100%));
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+/* Genre card animations */
+@keyframes genreCardHover {
+  0% {
+    transform: translateY(0);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+  100% {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+}
+
+.genre-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.genre-card:hover {
+  animation: genreCardHover 0.2s forwards;
+}
+
+/* Icon rotation animation */
+@keyframes rotateIcon {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(15deg);
+  }
+}
+
+.genre-icon {
+  transition: transform 0.3s ease;
+}
+
+.genre-card:hover .genre-icon {
+  animation: rotateIcon 0.3s forwards;
+}
+
+/* Genre image fade-in effect */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.genre-card img {
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* Custom hover effect for genre cards with images */
+.genre-card:hover img {
+  transform: scale(1.05);
+  transition: transform 0.5s ease;
+}
+
+/* Genre card title styling for better visibility */
+.genre-card h2 {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.8);
+  font-weight: 700 !important;
+  letter-spacing: 0.02em;
+  font-size: 1.1rem;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

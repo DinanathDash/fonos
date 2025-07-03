@@ -1,12 +1,13 @@
 import { Clock } from 'lucide-react';
 import { Card, CardContent } from '../../components/ui/card';
+import MarqueeText from '../../components/ui/marquee-text';
 
 const SearchResultTracks = ({ tracks, onPlayTrack }) => {
   return (
     <div className="space-y-4">
       {tracks.map((track, index) => (
         <Card
-          key={index}
+          key={`${track.id || track.videoId || ''}-${index}`}
           className="cursor-pointer transition-colors hover:bg-accent/50 group"
           onClick={() => onPlayTrack(track)}
         >
@@ -17,10 +18,10 @@ const SearchResultTracks = ({ tracks, onPlayTrack }) => {
               className="h-12 w-12 rounded object-cover"
             />
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-foreground truncate">{track.name}</h3>
-              <p className="text-sm text-muted-foreground truncate">
+              <MarqueeText className="font-medium text-foreground">{track.name}</MarqueeText>
+              <MarqueeText className="text-sm text-muted-foreground">
                 {track.artist || track.artists?.[0]?.name}
-              </p>
+              </MarqueeText>
             </div>
             <div className="flex items-center space-x-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
