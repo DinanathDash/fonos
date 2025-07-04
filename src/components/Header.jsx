@@ -178,10 +178,6 @@ const Header = ({ onOpenAuth, isScrolled = false, onToggleSidebar = () => {}, si
                       <Heart className="mr-2 h-4 w-4" />
                       Your Library
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </DropdownMenuItem>
                   </DropdownMenuGroup>
                   
                   <DropdownMenuSeparator className="bg-white/10" />

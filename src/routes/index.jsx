@@ -7,7 +7,6 @@ import Playlist from '../pages/Playlist';
 import Album from '../pages/Album';
 import Artist from '../pages/Artist';
 import Profile from '../pages/Profile';
-import Settings from '../pages/Settings';
 
 export const router = createBrowserRouter([
   {
@@ -46,10 +45,6 @@ export const router = createBrowserRouter([
         path: 'profile',
         element: <Profile />
       },
-      {
-        path: 'settings',
-        element: <Settings />
-      }
     ]
   },
   {

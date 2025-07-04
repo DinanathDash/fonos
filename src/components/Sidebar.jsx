@@ -171,29 +171,6 @@ const Sidebar = () => {
           )}
         </div>
       </ScrollArea>
-
-      {/* User Profile / Settings - Only show if authenticated */}
-      {user && (
-        <div className="border-t border-white/10">
-          <div className="h-[60px] px-3 flex items-center">
-            <div className="flex items-center justify-between bg-black/40 rounded-lg w-full">
-              <Button asChild variant="ghost" size="sm" className="flex-1 justify-start hover:bg-white/5">
-                <Link to="/profile" className="flex items-center">
-                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-2">
-                    <User className="h-4 w-4 text-primary" />
-                  </div>
-                  <span className="text-sm font-medium">{user.displayName || 'Profile'}</span>
-                </Link>
-              </Button>
-              <Button asChild variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-white/5">
-                <Link to="/settings">
-                  <Settings className="h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
