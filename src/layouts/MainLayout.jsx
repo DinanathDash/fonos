@@ -13,6 +13,13 @@ const MainLayout = () => {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  // Clear auth popover when user becomes authenticated
+  useEffect(() => {
+    if (user) {
+      setShowAuthPopover(false);
+    }
+  }, [user]);
+
   // Show auth popover automatically after 3 seconds if user is not authenticated
   useEffect(() => {
     if (!user) {

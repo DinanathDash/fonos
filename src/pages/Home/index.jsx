@@ -152,50 +152,52 @@ const Home = () => {
   const timeOfDay = getTimeOfDay();
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="px-6 py-4">
       {/* Welcome Banner for unauthenticated users */}
       {!user && onOpenAuth && (
         <WelcomeBanner onOpenAuth={onOpenAuth} />
       )}
 
-      {/* Welcome Section with gradient accent */}
-      <section className="relative">
-        <div className="absolute -top-12 -left-6 w-48 h-48 bg-primary/10 rounded-full blur-3xl opacity-70 -z-10" />
-        <div className="absolute top-0 right-6 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl opacity-60 -z-10" />
+      <div className="space-y-8">
+        {/* Welcome Section with gradient accent */}
+        <section className="relative">
+          <div className="absolute -top-12 -left-6 w-48 h-48 bg-primary/10 rounded-full blur-3xl opacity-70 -z-10" />
+          <div className="absolute top-0 right-6 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl opacity-60 -z-10" />
 
-        <h1 className={cn(
-          "text-4xl font-bold mb-2 bg-clip-text text-transparent",
-          timeOfDay === "morning" && "bg-gradient-to-r from-yellow-400 to-orange-500",
-          timeOfDay === "afternoon" && "bg-gradient-to-r from-blue-400 to-teal-500",
-          timeOfDay === "evening" && "bg-gradient-to-r from-purple-400 to-pink-500",
-          timeOfDay === "night" && "bg-gradient-to-r from-indigo-500 to-purple-700"
-        )}>
-          Good {timeOfDay}
-          <SparklesIcon className="h-6 w-6 inline-block ml-2 text-primary" />
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          {!user
-            ? "Discover amazing music and create your perfect playlist."
-            : `Welcome back${user?.displayName ? ', ' + user.displayName : ''}! Enjoy your personalized music experience.`
-          }
-        </p>
-      </section>
+          <h1 className={cn(
+            "text-4xl font-bold mb-2 bg-clip-text text-transparent",
+            timeOfDay === "morning" && "bg-gradient-to-r from-yellow-400 to-orange-500",
+            timeOfDay === "afternoon" && "bg-gradient-to-r from-blue-400 to-teal-500",
+            timeOfDay === "evening" && "bg-gradient-to-r from-purple-400 to-pink-500",
+            timeOfDay === "night" && "bg-gradient-to-r from-indigo-500 to-purple-700"
+          )}>
+            Good {timeOfDay}
+            <SparklesIcon className="h-6 w-6 inline-block ml-2 text-primary" />
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            {!user
+              ? "Discover amazing music and create your perfect playlist."
+              : `Welcome back${user?.displayName ? ', ' + user.displayName : ''}! Enjoy your personalized music experience.`
+            }
+          </p>
+        </section>
 
-      {/* Recently Played with enhanced card design */}
-      <RecentlyPlayedSection
-        recentlyPlayed={recentlyPlayed}
-        onPlayTrack={handlePlayTrack}
-      />
+        {/* Recently Played with enhanced card design */}
+        <RecentlyPlayedSection
+          recentlyPlayed={recentlyPlayed}
+          onPlayTrack={handlePlayTrack}
+        />
 
-      {/* Featured Playlists */}
-      <FeaturedPlaylistsSection featuredPlaylists={featuredPlaylists} />
+        {/* Featured Playlists */}
+        <FeaturedPlaylistsSection featuredPlaylists={featuredPlaylists} />
 
-      {/* Your Top Tracks */}
-      <TopTracksSection
-        topTracks={topTracks}
-        onPlayTrack={handlePlayTrack}
-        loading={loading}
-      />
+        {/* Your Top Tracks */}
+        <TopTracksSection
+          topTracks={topTracks}
+          onPlayTrack={handlePlayTrack}
+          loading={loading}
+        />
+      </div>
     </div>
   );
 };

@@ -1,68 +1,54 @@
-# 🎵 Fonos - Enhanced Music Streaming with Vast Catalog
+# 🎵 Fonos - Modern Music Streaming App
 
-A modern, feature-rich music streaming application with access to **1,000,000+ tracks** from 6 different free music APIs. Experience unlimited, legal, high-quality music streaming.
+A sleek and modern music streaming application built with React and Firebase. Stream music from YouTube Music and get rich metadata from Last.fm.
 
 ![Fonos Screenshot](https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=400&fit=crop&crop=center)
 
 ## ✨ Enhanced Features
 
-### 🎧 Massive Music Catalog
-- **1,000,000+ tracks** from 6 free music APIs
-- **500+ genres** from classical to electronic  
-- **Featured playlists** from multiple platforms
-- **Live radio stations** from around the world
-- **Full-length streaming** (not just previews)
-- **High-quality MP3** audio streams
+### ✨ Key Features
+- **🎵 YouTube Music Integration**: Access to millions of songs through YouTube Music
+- **📊 Last.fm Metadata**: Rich artist and track information
+- **🎧 Full Music Player**: Play, pause, skip, shuffle, and repeat functionality
+- **� Playlist Support**: Create and manage playlists
+- **� Beautiful UI**: Dark mode interface with modern design
+- **� Responsive Design**: Works on desktop, tablet, and mobile
 
-### 🔗 Integrated Music APIs
-- **🎶 Jamendo**: 500K+ Creative Commons tracks with streaming
-- **📚 Archive.org**: 1M+ Public Domain & historical recordings
-- **🎚️ ccMixter**: 50K+ Creative Commons remixes & originals
-- **🎵 Deezer**: 90M+ track metadata & chart information
-- **📖 MusicBrainz**: Comprehensive music metadata database
-- **📻 Radio Browser**: 40K+ live radio stations worldwide
+### 🎵 Music Features
+- **YouTube Music Integration**: Stream millions of songs
+- **Advanced Search**: Search tracks, artists, albums, and playlists
+- **Music Discovery**: Featured playlists and recommendations
+- **Personal Library**: Save your favorite songs and create playlists
 
-### 🚀 Advanced Discovery
-- **Multi-source search** across all 6 APIs
-- **Mood-based recommendations** (chill, energetic, focus, workout)
-- **Genre exploration** with real streaming tracks
-- **Trending music** from multiple platforms
-- **Smart fallbacks** if any API is unavailable
+### 🔐 User Features
+- **Firebase Authentication**: Secure email/password and Google sign-in
+- **User Profiles**: Personalized user experience
+- **Library Management**: Create and manage playlists
+- **Recently Played**: Track your listening history
 
-### 🎧 Core Music Features
-- **Full-Featured Music Player**: Play, pause, skip, shuffle, repeat with seamless audio controls
-- **Advanced Search**: Real-time search across tracks, artists, albums, and playlists from 6 APIs
-- **Personal Library**: Manage liked songs, custom playlists, and recently played
-- **Music Discovery**: AI-powered recommendations and vast catalog exploration
+### 🎨 UI/UX Features
+- **Dark Theme**: Beautiful dark interface with accent colors
+- **Responsive Design**: Works on all devices
+- **ShadcnUI Components**: Modern, accessible UI components
+- **Smooth Animations**: Clean transitions and loading states
 
-### 🔐 Authentication & User Management
-- **Firebase Authentication**: Secure email/password and Google OAuth sign-in
-- **User Profiles**: Personalized user experience with profile management
-- **Social Features**: Follow artists, create and share playlists
-
-### 🎨 Modern UI/UX
-- **Dark Theme Design**: Beautiful dark interface with lime green accents
-- **Responsive Layout**: Seamless experience across desktop, tablet, and mobile
-- **Smooth Animations**: Intuitive interactions with fluid transitions
-- **Accessibility**: WCAG compliant with keyboard navigation support
-
-### 🚀 Performance & Technical
-- **Lightning Fast**: Optimized with Vite for instant hot reloading
-- **Component Library**: ShadCN + Material UI for consistent, beautiful components
-- **State Management**: Efficient React Context for global state
-- **Enhanced Music APIs**: Integration with 6 free music APIs for vast catalog
-- **Smart Caching**: Intelligent caching system to reduce API calls and improve performance
+### 🚀 Technical Features
+- **React + Vite**: Fast development and build times
+- **Firebase Backend**: Authentication and data storage
+- **YouTube Music API**: Vast music catalog access
+- **Last.fm Integration**: Rich music metadata
+- **Context API**: Efficient state management
 
 ## 🛠️ Tech Stack
 
 | Category | Technology |
 |----------|------------|
-| **Frontend** | React 19, JSX |
+| **Frontend** | React 19 |
 | **Build Tool** | Vite |
-| **Styling** | Tailwind CSS, Material UI, ShadCN |
+| **Styling** | Tailwind CSS + ShadcnUI |
 | **Authentication** | Firebase Auth |
 | **Database** | Firebase Firestore |
-| **Music APIs** | Jamendo + Archive.org + ccMixter + Deezer + MusicBrainz + Radio Browser |
+| **Music APIs** | YouTube Music API + Last.fm |
 | **Routing** | React Router DOM |
 | **Icons** | Lucide React |
 | **State** | React Context API |
@@ -71,18 +57,11 @@ A modern, feature-rich music streaming application with access to **1,000,000+ t
 
 ### Prerequisites
 - Node.js 18+ 
-- Free Jamendo API key (required)
-- Optional: Pixabay API key (more content)
+- Firebase project
+- YouTube Music API key (required)
+- Last.fm API key (required)
 
-### 1. Get Your Free Jamendo API Key
-```bash
-# Visit https://devportal.jamendo.com/
-# 1. Create free account
-# 2. Create new application  
-# 3. Copy your Client ID
-```
-
-### 2. Installation
+### Installation
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -91,23 +70,23 @@ cd fonos
 # Install dependencies
 npm install
 
-# Setup environment
+# Setup environment variables
 cp .env.example .env.local
-# Add your Jamendo Client ID to .env.local
 ```
 
-### 3. Environment Configuration
+### Environment Configuration
 ```bash
-# Required: Jamendo API key
-VITE_JAMENDO_CLIENT_ID=your_jamendo_client_id_here
+# Required: API Keys
+VITE_YOUTUBE_MUSIC_API_KEY=your_youtube_music_api_key
+VITE_LASTFM_API_KEY=your_lastfm_api_key
 
-# Optional: Firebase (for authentication)
-VITE_FIREBASE_API=your_firebase_api_key
-VITE_FIREBASE_DOMAIN=your_project.firebaseapp.com
+# Required: Firebase Config
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_project_id
-
-# Optional: Pixabay (additional music)
-VITE_PIXABAY_API_KEY=your_pixabay_api_key
+VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
 ```
 
 ### 4. Run the Application
@@ -122,43 +101,37 @@ npm run build
 npm run preview
 ```
 
-## 🎵 Music Catalog Features
+## 🎵 Music Features
 
-### 📊 Massive Collection
-- **1,000,000+ tracks** across all sources
-- **500+ genres** with real streaming content
-- **100,000+ artists** from around the world
-- **Unlimited playlists** from multiple platforms
+### 🎧 YouTube Music Integration
+- Stream millions of songs from YouTube Music
+- Access official music videos and audio tracks
+- Get high-quality audio playback
+- Discover trending and popular music
 
-### 🎧 Streaming Sources
+### 📊 Last.fm Integration
+- Rich artist and track metadata
+- Similar artist recommendations
+- Album artwork and descriptions
+- User scrobbling support
 
-#### Primary Streaming (Full Audio)
-- **Jamendo**: 500K+ Creative Commons licensed tracks
-- **Archive.org**: 1M+ Public Domain historical recordings
-- **ccMixter**: 50K+ Creative Commons remixes and originals
-
-#### Metadata & Discovery
-- **Deezer**: 90M+ track metadata and charts
-- **MusicBrainz**: Comprehensive music database
-- **Radio Browser**: 40K+ live radio stations
-
-### 🔍 Advanced Search
+### 🔍 Search & Discovery
 ```javascript
-// Search across all 6 APIs simultaneously
+// Search YouTube Music
 const results = await musicService.search('jazz piano', 'track', 20);
 
-// Get music by mood
-const chillTracks = await musicService.getMusicByMood('chill', 15);
+// Get track metadata from Last.fm
+const metadata = await lastFmApi.getTrackInfo(track);
 
-// Explore specific sources
-const archiveTracks = await musicService.getTracksBySource('archive', 10);
+// Get personalized recommendations
+const recommendations = await musicService.getRecommendations(userId);
 ```
 
-### 🎯 Smart Features
-- **Mood-based recommendations**: chill, energetic, focus, workout, sleep, party
-- **Multi-source fallbacks**: If one API fails, others continue working
-- **Intelligent caching**: Reduces API calls and improves performance  
-- **Real-time discovery**: Trending tracks from multiple platforms
+### 🎯 Key Features
+- **Smart Search**: Search across YouTube Music's vast catalog
+- **Rich Metadata**: Enhanced track info from Last.fm
+- **Offline Support**: Cache frequently played tracks
+- **Discovery**: Personalized music recommendations
 
 ## 📁 Project Structure
 ```
@@ -309,15 +282,14 @@ VITE_JAMENDO_CLIENT_ID=your_jamendo_client_id
 | `npm run preview` | Preview production build |
 | `npm run lint` | Run ESLint |
 
-## 📱 Features in Development
+## 📱 Roadmap
 
-- [ ] **Lyrics Integration**: Real-time lyrics display
-- [ ] **Audio Visualizer**: Beautiful waveform animations
-- [ ] **Offline Mode**: Download songs for offline listening
-- [ ] **Social Features**: Share playlists and follow friends
-- [ ] **Podcast Support**: Stream podcasts and audio content
-- [ ] **Voice Commands**: Control playback with voice
-- [ ] **Smart Recommendations**: AI-powered music discovery
+- [ ] **Lyrics Integration**: Display synchronized lyrics
+- [ ] **Audio Visualizer**: Add waveform animations
+- [ ] **Offline Mode**: Cache songs for offline play
+- [ ] **Social Features**: Share music with friends
+- [ ] **Desktop App**: Electron-based desktop version
+- [ ] **Mobile Apps**: React Native mobile versions
 
 ## 🤝 Contributing
 
@@ -333,33 +305,48 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+```
+MIT License
+
+Copyright (c) 2024 Fonos
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
 ## 🙏 Acknowledgments
 
-- [Firebase](https://firebase.google.com/) for backend services
-- [Tailwind CSS](https://tailwindcss.com/) for styling system
-- [ShadCN](https://ui.shadcn.com/) for component library
-- [Lucide React](https://lucide.dev/) for beautiful icons
-- [Unsplash](https://unsplash.com/) for beautiful placeholder images
+- [React](https://reactjs.org/) - UI framework
+- [Vite](https://vitejs.dev/) - Build tool
+- [Firebase](https://firebase.google.com/) - Backend services
+- [Tailwind CSS](https://tailwindcss.com/) - Styling
+- [ShadcnUI](https://ui.shadcn.com/) - UI components
+- [YouTube Music API](https://music.youtube.com/) - Music streaming
+- [Last.fm API](https://www.last.fm/api) - Music metadata
+- [Lucide Icons](https://lucide.dev/) - Beautiful icons
 
 ## 📞 Support
 
-- 📧 Email: support@fonos-app.com
-- 💬 Discord: [Join our community](https://discord.gg/fonos)
 - 🐛 Issues: [GitHub Issues](https://github.com/yourusername/fonos/issues)
+- 💻 Source: [GitHub Repository](https://github.com/yourusername/fonos)
 
 ---
 
 <div align="center">
   <p>Made with ❤️ by the Fonos team</p>
-</div>+ Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+</div>
